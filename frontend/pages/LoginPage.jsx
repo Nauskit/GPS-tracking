@@ -6,6 +6,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
+
     const handleSumbit = async (e) => {
         e.preventDefault();
         setError('');
@@ -31,6 +32,7 @@ export default function LoginPage() {
             localStorage.setItem('role', data.role);
 
             alert("Login successful")
+
 
         } catch (err) {
             setError(err.message);

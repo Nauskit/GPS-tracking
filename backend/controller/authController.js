@@ -45,6 +45,10 @@ exports.login = async (req, res) => {
         }
         const accessToken = generateAccessToken(loginUser);
         const refreshToken = generateRefreshToken(loginUser);
+
+        loginUser.refreshToken = refreshToken;
+        await loginUser.save();
+
         return res.status(200).json({
             message: "Login Ssuccessfully",
             role: loginUser.role,
