@@ -1,5 +1,6 @@
 const User = require('../models/user')
 const bcrypt = require('bcrypt')
+const { generateAccessToken, generateRefreshToken } = require('../utils/jwt')
 require('dotenv').config();
 
 const SALT_ROUNDS = 10;
@@ -42,9 +43,13 @@ exports.login = async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid Password" })
         }
+        const accessToken = generateAccessToken(loginUser);
+        const refreshToken = generateRefreshToken(loginUser);
         return res.status(200).json({
             message: "Login Ssuccessfully",
-            role: loginUser.role
+            role: loginUser.role,
+            accessToken,
+            refreshToken
         })
     } catch (err) {
         console.error(err);
