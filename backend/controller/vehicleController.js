@@ -31,13 +31,16 @@ exports.registerVehicle = async (req, res) => {
 
 //The userId has a problem, so it's not finished yet.
 exports.getVehicleByid = async (req, res) => {
-  const { userId } = req.user.id;
+  const userId = req.user.id;
+
+  if (!userId) {
+    return res.status(401).json({ message: "User not found" });
+  }
 
   try {
-    const findVehicleId = await Vehicles.find({ userId }).populate(
-      "driverName",
-      "licenserPlate"
-    );
+    const findVehicleId = await Vehicles.find({ userId })
+      .populate("driverName", "licenserPlate")
+      .populate("userId", "username");
     return res.status(200).json({ findVehicleId });
   } catch (err) {
     console.error(err);

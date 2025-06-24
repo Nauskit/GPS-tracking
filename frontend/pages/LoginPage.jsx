@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -86,6 +86,9 @@ export default function LoginPage() {
           >
             Login
           </button>
+          <p className="text-right">
+            <Link to="/">back</Link>
+          </p>
         </form>
       </div>
     </div>
