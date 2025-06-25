@@ -14,6 +14,22 @@ const vehiclesSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  carType: {
+    type: String,
+    default: null
+  },
+  latitude: {
+    type: Number,
+    default: '13.7563'
+  },
+  longitude: {
+    type: Number,
+    default: '100.5018'
+  },
+  speed: {
+    type: Number,
+    default: null
+  },
   createAt: {
     type: Date,
     default: Date.now(),

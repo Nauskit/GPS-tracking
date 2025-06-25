@@ -1,6 +1,11 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import Leaflet from "leaflet";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { io } from 'socket.io-client'
+
+
+
 
 //Icon
 const carIcon = new Leaflet.Icon({
@@ -9,7 +14,50 @@ const carIcon = new Leaflet.Icon({
   iconAnchor: [16, 32],
 });
 
+
+
 export default function MapPage() {
+  // const [position, setPosition] = useState("");
+  const [error, setError] = useState('');
+  const [users, setUsers] = useState([]);
+
+  const accessToken = localStorage.getItem("accessToken")
+
+  useEffect(() => {
+    const fetchVehicle = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/vehicle', {
+          method: "GET",
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        })
+        if (!res.ok) {
+          throw new Error(error.message || "Ftch Failed")
+        }
+        const data = await res.json();
+        setUsers(data.findVehicleId)
+
+      } catch (err) {
+        setError(err);
+      }
+
+    }
+
+    fetchVehicle();
+
+    const socket = io.connect("http://localhost:3000");
+    socket.on('connect', () => {
+      console.log("User connect");
+    })
+    return () => {
+      socket.disconnect();
+      console.log("User disconnect");
+
+    }
+
+  }, [])
+
   const position = [13.7563, 100.5018];
 
   return (

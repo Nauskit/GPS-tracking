@@ -5,6 +5,7 @@ import { Routes, BrowserRouter, Route } from "react-router-dom";
 import VehiclePage from "../pages/VehiclePage";
 
 function App() {
+
   return (
     <BrowserRouter>
       <Routes>

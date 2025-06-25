@@ -1,7 +1,7 @@
 const Vehicles = require("../models/vehicles");
 
 exports.registerVehicle = async (req, res) => {
-  const { driverName, licenserPlate } = req.body;
+  const { driverName, licenserPlate, carType } = req.body;
   const userId = req.user.id;
   if (!driverName || !licenserPlate) {
     return res
@@ -20,6 +20,7 @@ exports.registerVehicle = async (req, res) => {
       userId,
       driverName,
       licenserPlate,
+      carType
     });
 
     return res.status(200).json({ message: "Register vehicle successful" });

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from 'react-router-dom'
 
 export default function VehiclePage() {
   const [users, setUsers] = useState([]);
@@ -16,7 +17,7 @@ export default function VehiclePage() {
         const res = await fetch("http://localhost:3000/vehicle", {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            'Authorization': `Bearer ${accessToken}`,
           },
         });
         if (!res.ok) {
@@ -39,12 +40,13 @@ export default function VehiclePage() {
       const res = await fetch("http://localhost:3000/vehicle/create", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
           "Content-type": "application/json",
         },
         body: JSON.stringify({
           driverName: driverName,
           licenserPlate: licenser,
+          carType: carType
         }),
       });
       const data = await res.json();
@@ -65,12 +67,17 @@ export default function VehiclePage() {
           <h1 className="text-2xl font-bold">
             {users[0]?.userId?.username || "Let's Login"}
           </h1>
-          <button
-            onClick={() => setPopup(true)}
-            className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
-          >
-            + Create
-          </button>
+          <div className="flex gap-3">
+
+
+            <button
+              onClick={() => setPopup(true)}
+              className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
+            >
+              + Create
+            </button>
+            <Link to='/map' className="bg-gray-500 px-4 py-2 rounded hover:bg-gray-600">Back</Link>
+          </div>
         </header>
         {error && <div>{error}</div>}
 
@@ -90,7 +97,7 @@ export default function VehiclePage() {
                   {users.map((user) => {
                     return (
                       <tr key={user._id} className="border-b-2">
-                        <td className="p-3">Toyota</td>
+                        <td className="p-3">{user.carType}</td>
                         <td className="p-3">{user.licenserPlate}</td>
                         <td className="p-3">{user.driverName}</td>
                         <td className="p-3">Location</td>
@@ -113,7 +120,6 @@ export default function VehiclePage() {
                 <div className="flex justify-between">
                   <h2>Register Vehicle</h2>
                   <a
-                    href=""
                     className="cursor-pointer"
                     onClick={() => setPopup(false)}
                   >
@@ -146,6 +152,7 @@ export default function VehiclePage() {
                       className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
                       type="text"
                       placeholder="truck"
+                      onChange={(e) => setCarType(e.target.value)}
                     ></input>
                   </div>
                   <button
@@ -158,9 +165,10 @@ export default function VehiclePage() {
                 </form>
               </div>
             </div>
-          </div>
-        )}
-      </main>
+          </div >
+        )
+        }
+      </main >
     </>
   );
 }
