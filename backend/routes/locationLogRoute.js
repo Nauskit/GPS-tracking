@@ -1,8 +1,8 @@
 const express = require('express');
-const route = express.Router();
+const router = express.Router();
 const locationLogController = require('../controller/locationLogController');
 
-route.post('/', locationLogController.systemLocationLog);
-route.get('/:vehicleId', locationLogController.getSystemLocationLog);
+router.post('/', locationLogController.systemLocationLog);
+router.get('/', locationLogController.getSystemLocationLog);
 
-module.exports = route;
+module.exports = router;

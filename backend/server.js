@@ -26,7 +26,7 @@ const io = new Server(server, {
 
 app.use("/user", authRoute);
 app.use("/vehicle", verifyToken, vehicleRoute);
-app.use("/locationlog", locationLogRoute)
+app.use("/locationlog", verifyToken, locationLogRoute)
 
 io.on('connection', (socket) => {
   console.log('a user connected');

@@ -17,10 +17,6 @@ const locationLogSchema = new mongoose.Schema({
     speed: {
         type: Number,
     },
-    timestamp: {
-        type: Date,
-        default: Date.now()
-    }
-})
+}, { timestamps: true })
 
 module.exports = mongoose.model("LocationLog", locationLogSchema);
