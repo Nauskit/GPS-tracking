@@ -1,32 +1,34 @@
-const LocationLog = require('../models/locationLog')
+const LocationLog = require("../models/locationLog");
 
 exports.systemLocationLog = async (req, res) => {
-    const { vehicleId, latitude, longitude, speed } = req.body;
+  const { vehicleId, latitude, longitude, speed } = req.body;
 
-    try {
-        const newLog = new LocationLog({
-            vehicleId,
-            latitude,
-            longitude,
-            speed
-        });
+  try {
+    const newLog = new LocationLog({
+      vehicleId,
+      latitude,
+      longitude,
+      speed,
+    });
 
-        const saveLog = await newLog.save();
-        return res.status(201).json(saveLog)
-    } catch (err) {
-        return res.status(500).json({ message: "Server error" })
-    }
-}
-
+    const saveLog = await newLog.save();
+    return res.status(201).json(saveLog);
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
 
 exports.getSystemLocationLog = async (req, res) => {
-    const { vehicleId } = req.params;
-    try {
-        const logs = await LocationLog.findOne({ vehicleId }).sort({ timestamp: -1 });
+  const vehicleId = req.params.id;
 
-        res.json(logs)
-    } catch (err) {
-        return res.status(500).json({ message: "Server error" })
-    }
+  if (!vehicleId) {
+    return res.status(401).json({ message: "Not have vegicleId" });
+  }
+  try {
+    const logs = await LocationLog.findById(vehicleId);
 
-}
+    return res.status(200).json(logs);
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
