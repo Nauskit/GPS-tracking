@@ -1,22 +1,23 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-
-const locationLogSchema = new mongoose.Schema({
-
+const locationLogSchema = new mongoose.Schema(
+  {
     vehicleId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Vehicles',
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vehicles",
+      required: true,
     },
     latitude: {
-        type: Number,
+      type: Number,
     },
     longitude: {
-        type: Number,
+      type: Number,
     },
     speed: {
-        type: Number,
+      type: Number,
     },
-}, { timestamps: true })
+  },
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("LocationLog", locationLogSchema);

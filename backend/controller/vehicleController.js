@@ -20,7 +20,7 @@ exports.registerVehicle = async (req, res) => {
       userId,
       driverName,
       licenserPlate,
-      carType
+      carType,
     });
 
     return res.status(200).json({ message: "Register vehicle successful" });
@@ -30,7 +30,6 @@ exports.registerVehicle = async (req, res) => {
   }
 };
 
-//The userId has a problem, so it's not finished yet.
 exports.getVehicleByid = async (req, res) => {
   const userId = req.user.id;
 
@@ -46,5 +45,25 @@ exports.getVehicleByid = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server Error: ", err });
+  }
+};
+
+exports.updateVehicleLocation = async (req, res) => {
+  const { licenserPlate } = req.params;
+  const { latitude, longitude } = req.body;
+
+  try {
+    const vehicle = await Vehicles.findOne({ licenserPlate });
+    if (!vehicle) {
+      return res.status(404).json({ message: "vehicle not found!" });
+    }
+
+    vehicle.latitude = latitude;
+    vehicle.longitude = longitude;
+    await vehicle.save();
+
+    return res.status(200).json({ message: "vehicle location update" });
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
   }
 };
