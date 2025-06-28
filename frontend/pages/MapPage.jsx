@@ -39,15 +39,35 @@ export default function MapPage() {
 
     fetchVehicle();
 
+
     const socket = io.connect("http://localhost:3000");
+
+
+    socket.on("locationUpdate", (locationUpdate) => {
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.licenserPlate === locationUpdate.licenserPlate ?
+            { ...user, latitude: locationUpdate.latitude, longitude: locationUpdate.longitude }
+            : user
+        )
+      )
+    })
+
     socket.on("connect", () => {
       console.log("User connect");
+
     });
     return () => {
       socket.disconnect();
       console.log("User disconnect");
     };
+
+
+
   }, []);
+
+
+
 
   const position = [13.7563, 100.5018];
 
@@ -69,7 +89,7 @@ export default function MapPage() {
           <h1 className="text-xl mb-3 text-center">GPS Tracking</h1>
           <MapContainer
             center={position}
-            zoom={13}
+            zoom={8}
             scrollWheelZoom={true}
             className="h-150 w-200 mb-10"
           >
@@ -77,12 +97,17 @@ export default function MapPage() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution="&copy; OpenStreetMap contributors"
             />
-            <Marker position={position} icon={carIcon}>
-              <Popup>
-                You're Here! <br /> (Latitude: {position[0]}, Longitude:{" "}
-                {position[1]})
-              </Popup>
-            </Marker>
+            {users.map(user => {
+              return (
+                <Marker key={user._id} position={[user.latitude, user.longitude]} icon={carIcon}>
+                  <Popup>
+                    {user.driverName} <br />
+                    Plate: {user.licenserPlate} <br />
+                    Lat: {user.latitude}, Lng: {user.longitude}
+                  </Popup>
+                </Marker>
+              )
+            })}
           </MapContainer>
         </div>
       </section>

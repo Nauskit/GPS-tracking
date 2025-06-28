@@ -1,4 +1,5 @@
 const Vehicles = require("../models/vehicles");
+const { getIo } = require("../socket");
 
 exports.registerVehicle = async (req, res) => {
   const { driverName, licenserPlate, carType } = req.body;
@@ -48,6 +49,17 @@ exports.getVehicleByid = async (req, res) => {
   }
 };
 
+
+exports.getAllVehicle = async (req, res) => {
+  try {
+    const vehicle = await Vehicles.find().sort({ createAt: -1 });
+    return res.status(200).json(vehicle)
+
+  } catch (err) {
+    return res.status(500).json({ message: "Server Error: ", err })
+  }
+}
+
 exports.updateVehicleLocation = async (req, res) => {
   const { licenserPlate } = req.params;
   const { latitude, longitude } = req.body;
@@ -61,6 +73,14 @@ exports.updateVehicleLocation = async (req, res) => {
     vehicle.latitude = latitude;
     vehicle.longitude = longitude;
     await vehicle.save();
+
+    const io = getIo();
+    io.emit("locationUpdate", {
+      licenserPlate,
+      latitude,
+      longitude,
+    })
+
 
     return res.status(200).json({ message: "vehicle location update" });
   } catch (err) {
