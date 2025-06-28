@@ -15,6 +15,7 @@ export default function MapPage() {
   // const [position, setPosition] = useState("");
   const [error, setError] = useState("");
   const [users, setUsers] = useState([]);
+  const [isLogin, setIsLogin] = useState(false);
 
   const accessToken = localStorage.getItem("accessToken");
 
@@ -30,12 +31,17 @@ export default function MapPage() {
         if (!res.ok) {
           throw new Error(error.message || "Ftch Failed");
         }
+        if (accessToken) {
+          setIsLogin(true);
+        }
         const data = await res.json();
         setUsers(data.findVehicleId);
       } catch (err) {
         setError(err);
       }
+
     };
+
 
     fetchVehicle();
 
@@ -81,7 +87,11 @@ export default function MapPage() {
         </div>
         <div className="gap-5 flex">
           <Link to="/vehicle/create">Create</Link>
-          <Link to="/login">Login</Link>
+          {isLogin && users ? (
+            <div>{localStorage.getItem("role")}</div> //temporary user
+          ) : (
+            <Link to="/login">Login</Link>
+          )}
         </div>
       </nav>
       <section>

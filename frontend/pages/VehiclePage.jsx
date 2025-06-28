@@ -9,6 +9,7 @@ export default function VehiclePage() {
   const [licenser, setLicenser] = useState("");
   const [carType, setCarType] = useState("");
 
+
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
 
