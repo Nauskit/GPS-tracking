@@ -4,6 +4,7 @@ import MapPage from "../pages/MapPage";
 import { Routes, BrowserRouter, Route } from "react-router-dom";
 import VehiclePage from "../pages/VehiclePage";
 import MockupPage from "../pages/MockupPage";
+import TripPage from "../pages/TripPage";
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
         <Route path="/map" element={<MapPage />} />
         <Route path="/vehicle/create" element={<VehiclePage />} />
         <Route path="/mockup" element={<MockupPage />} />
+        <Route path="/trip" element={<TripPage />} />
       </Routes>
     </BrowserRouter>
   );

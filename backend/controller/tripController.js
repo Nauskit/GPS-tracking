@@ -13,7 +13,8 @@ exports.onTrip = async (req, res) => {
         return res.status(201).json(newTrip)
 
     } catch (err) {
-        return res.status(500).json({ message: "Server Error" });
+        console.error(err)
+        return res.status(500).json({ message: "Server Error", error: err.message });
     }
 }
 
@@ -28,14 +29,17 @@ exports.finishTrip = async (req, res) => {
         if (!trip) {
             return res.status(404).json({ message: "Trip not found" })
         }
-        return res.status(200).json
+
+        await Vehicles.findByIdAndUpdate(trip.vehicleId, { onTrip: false })
+
+        return res.status(200).json({ message: "Trip finished", trip })
     } catch (err) {
         return res.status(500).json({ message: "Cannot finish trip", error: err })
     }
 }
 
 exports.logLocation = async (req, res) => {
-    const { vehicleId, latitude, longitude, speed } = rqe.body
+    const { vehicleId, latitude, longitude, speed } = req.body
 
     try {
         const currentTrip = await Trip.findOne({ vehicleId, status: 'onTrip' });

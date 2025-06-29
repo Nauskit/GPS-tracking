@@ -6,6 +6,7 @@ export default function MockupPage() {
   const [licenserPlate, setLicenserPlate] = useState("");
   const [userVehicles, setUserVehicles] = useState([]);
 
+
   const accessToken = localStorage.getItem("accessToken");
 
   const handleSubmit = async (e) => {
@@ -66,6 +67,7 @@ export default function MockupPage() {
     fetchVehicleData();
   }, [accessToken])
 
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 gap-10">
       <form
@@ -116,22 +118,7 @@ export default function MockupPage() {
         >
           Submit
         </button>
-        <div className="flex gap-5">
-          <button
-            type="submit"
-            className="w-1/2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 cursor-pointer"
-          >
-            Ontrip
-          </button>
-          <button
-            type="submit"
-            className="w-1/2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 cursor-pointer"
-          >
-            Finish Trip
-          </button>
-        </div>
       </form>
-
     </div>
   );
 }
