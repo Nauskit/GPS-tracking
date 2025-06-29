@@ -7,6 +7,11 @@ const locationLogSchema = new mongoose.Schema(
       ref: "Vehicles",
       required: true,
     },
+    tripId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Trip',
+      default: null,
+    },
     latitude: {
       type: Number,
     },
@@ -20,4 +25,5 @@ const locationLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+locationLogSchema.index({ createAt: 1 }, { expireAfterSeconds: 2592000 })
 module.exports = mongoose.model("LocationLog", locationLogSchema);

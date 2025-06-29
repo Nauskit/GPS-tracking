@@ -30,6 +30,10 @@ const vehiclesSchema = new mongoose.Schema({
     type: Number,
     default: null
   },
+  onTrip: {
+    type: Boolean,
+    default: false
+  },
   createAt: {
     type: Date,
     default: Date.now,

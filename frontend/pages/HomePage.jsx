@@ -1,16 +1,7 @@
-import { useState, useEffect } from "react";
 import image from "../src/assets/transport-unsplash.jpg";
 import { Link } from "react-router-dom";
 
 export default function HomePage() {
-  const [isLogin, setIsLogin] = useState(false);
-
-  useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    if (accessToken) {
-      setIsLogin(true);
-    }
-  }, []);
 
 
   return (
@@ -28,13 +19,10 @@ export default function HomePage() {
               <button className="hover:text-blue-600 border-2 p-2 bg-gray-100">
                 <Link to="/map">Get Start</Link>
               </button>
-              {!isLogin ? (
-                <button className="hover:text-blue-500 p-2">
-                  <Link to="/login">Login</Link>
-                </button>
-              ) : (
-                ""
-              )}
+
+              <button className="hover:text-blue-500 p-2">
+                <Link to="/login">Login</Link>
+              </button>
 
             </div>
           </div>

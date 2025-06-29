@@ -64,10 +64,10 @@ export default function MockupPage() {
 
     }
     fetchVehicleData();
-  }, [])
+  }, [accessToken])
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 gap-10">
       <form
         onSubmit={handleSubmit}
         className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-sm"
@@ -109,16 +109,29 @@ export default function MockupPage() {
             })}
 
           </select>
-
-
         </label>
         <button
           type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 mb-5 rounded-lg transition duration-200 cursor-pointer"
         >
           Submit
         </button>
+        <div className="flex gap-5">
+          <button
+            type="submit"
+            className="w-1/2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 cursor-pointer"
+          >
+            Ontrip
+          </button>
+          <button
+            type="submit"
+            className="w-1/2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 cursor-pointer"
+          >
+            Finish Trip
+          </button>
+        </div>
       </form>
+
     </div>
   );
 }
