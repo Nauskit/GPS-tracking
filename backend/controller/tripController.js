@@ -50,7 +50,7 @@ exports.logLocation = async (req, res) => {
             latitude,
             longitude,
             speed
-        })
+        });
 
         if (currentTrip) {
             currentTrip.path.push({

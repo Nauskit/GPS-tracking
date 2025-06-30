@@ -41,9 +41,8 @@ export default function MapPage() {
       }
 
     };
-
-
     fetchVehicle();
+
 
 
     const socket = io.connect("http://localhost:3000");
