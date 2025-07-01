@@ -1,6 +1,7 @@
 const Trip = require('../models/trip');
 const Vehicles = require('../models/vehicles');
 const LocationLog = require('../models/locationLog')
+const { publisher } = require('../utils/redis')
 
 
 exports.onTrip = async (req, res) => {
@@ -52,6 +53,7 @@ exports.logLocation = async (req, res) => {
             speed
         });
 
+        //trip path
         if (currentTrip) {
             currentTrip.path.push({
                 latitude,
@@ -66,6 +68,21 @@ exports.logLocation = async (req, res) => {
             longitude,
             speed
         })
+
+        if (speed > 90) {
+            const vehicle = await Vehicles.findById(vehicleId);
+            const alertData = {
+                vehicleId,
+                licenserPlate: vehicle?.licenserPlate,
+                driverName: vehicle?.driverName,
+                speed,
+                latitude,
+                longitude,
+                timestamp: new Date()
+            };
+
+            await publisher.publish("vehicle:overspeed", JSON.stringify(alertData));
+        }
         return res.status(201).json(locationLog)
     } catch (err) {
         return res.status(500).json({ message: "Failed to log location", error: err.message })

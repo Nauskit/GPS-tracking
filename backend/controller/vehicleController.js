@@ -40,7 +40,6 @@ exports.getVehicleByid = async (req, res) => {
 
   try {
     const findVehicleId = await Vehicles.find({ userId })
-      .populate("driverName", "licenserPlate")
       .populate("userId", "username")
     return res.status(200).json({ findVehicleId });
   } catch (err) {
@@ -79,6 +78,7 @@ exports.updateVehicleLocation = async (req, res) => {
       licenserPlate,
       latitude,
       longitude,
+      speed: vehicle.speed
     })
 
 

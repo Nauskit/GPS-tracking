@@ -11,6 +11,7 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const { initSocket } = require('./socket')
+const listenOverspeedAlert = require('./alertSubscriber')
 
 
 app.use(cors());
@@ -18,7 +19,7 @@ app.use(bodyParser.json());
 connectDB();
 
 initSocket(server)
-
+listenOverspeedAlert();
 
 app.use("/user", authRoute);
 app.use("/vehicle", verifyToken, vehicleRoute);

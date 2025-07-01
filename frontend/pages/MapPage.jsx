@@ -55,10 +55,15 @@ export default function MapPage() {
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.licenserPlate === locationUpdate.licenserPlate ?
-            { ...user, latitude: locationUpdate.latitude, longitude: locationUpdate.longitude }
+            { ...user, latitude: locationUpdate.latitude, longitude: locationUpdate.longitude, speed: locationUpdate.speed }
             : user
         )
       )
+    })
+
+    socket.on("overspeed", (data) => {
+      console.log(data);
+      alert(`${data.licenserPlate} overpeed: ${data.speed}`)
     })
 
     socket.on("connect", () => {
@@ -133,7 +138,8 @@ export default function MapPage() {
             />
             {users.map(user => {
               return (
-                <Marker key={user._id} position={[user.latitude, user.longitude]} icon={carIcon}>
+                <Marker key={user._id}
+                  position={[user.latitude, user.longitude]} icon={carIcon}>
                   <Popup>
                     {user.driverName} <br />
                     Plate: {user.licenserPlate} <br />
