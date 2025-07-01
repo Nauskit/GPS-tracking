@@ -91,7 +91,7 @@ export default function VehiclePage() {
                     <th className="p-3 text-left">Type</th>
                     <th className="p-3 text-left">Licensor Plate</th>
                     <th className="p-3 text-left">Driver name</th>
-                    <th className="p-3 text-left">Location</th>
+                    <th className="p-3 text-left">On Trip</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -101,7 +101,7 @@ export default function VehiclePage() {
                         <td className="p-3">{user.carType}</td>
                         <td className="p-3">{user.licenserPlate}</td>
                         <td className="p-3">{user.driverName}</td>
-                        <td className="p-3">Location</td>
+                        <td className="p-3">{user.onTrip ? "On trip" : "Idle"}</td>
                       </tr>
                     );
                   })}

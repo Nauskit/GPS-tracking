@@ -24,28 +24,28 @@ export default function MockupPage() {
       .split(",")
       .map((num) => parseFloat(num.trim()));
 
-    // try {
-    //   const res = await fetch(
-    //     `http://localhost:3000/vehicle/update/${licenserPlate}`,
-    //     {
-    //       method: "PUT",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         "Authorization": `Bearer ${accessToken}`
-    //       },
-    //       body: JSON.stringify({ latitude, longitude }),
-    //     }
-    //   );
+    try {
+      const res = await fetch(
+        `http://localhost:3000/vehicle/update/${licenserPlate}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({ latitude, longitude }),
+        }
+      );
 
-    //   if (res.ok) {
-    //     alert("Location updated successfully");
-    //   } else {
-    //     const data = await res.json();
-    //     alert("Failed to update: " + data.message);
-    //   }
-    // } catch (err) {
-    //   console.error(err.message);
-    // }
+      if (res.ok) {
+        alert("Location updated successfully");
+      } else {
+        const data = await res.json();
+        alert("Failed to update: " + data.message);
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
 
 
     const fetchVehicleLog = async () => {
@@ -63,13 +63,13 @@ export default function MockupPage() {
           body: JSON.stringify({ vehicleId: vehicle._id, latitude, longitude, speed })
         })
         if (res.ok) {
-          alert("Location updated successfully");
+          console.log("Location updated successfully");
         } else {
           const data = await res.json();
-          alert("Failed to update: " + data.message);
+          console.log("Failed to update: " + data.message);
         }
       } catch (err) {
-        alert("Failed to log location: " + err.message)
+        console.log("Failed to log location: " + err.message)
       }
     }
     fetchVehicleLog();

@@ -70,5 +70,17 @@ exports.logLocation = async (req, res) => {
     } catch (err) {
         return res.status(500).json({ message: "Failed to log location", error: err.message })
     }
+}
 
+
+//getVehicle path
+exports.getLocationLog = async (req, res) => {
+    const { vehicleId } = req.params;
+
+    try {
+        const getLocation = await Trip.findOne({ vehicleId, status: "onTrip" }).populate("path");
+        return res.json(getLocation)
+    } catch (err) {
+        return res.status(500).json({ message: "Failed to get location log" })
+    }
 }
