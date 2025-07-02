@@ -1,6 +1,6 @@
 GPS Tracking System
 
-A real-time vehicle tracking system with admin and user dashboards. Includes real-time location updates, route history, alerts (overspeed, geofencing), and user/device management. Built with modern technologies like React, Node.js, MongoDB, Redis, and Socket.IO.
+A real-time vehicle tracking system with admin and user dashboards. Includes real-time location updates, route history, alerts (overspeed), and user/device management. Built with modern technologies like React, Node.js, MongoDB, Redis, and Socket.IO.
 
 ---
 
