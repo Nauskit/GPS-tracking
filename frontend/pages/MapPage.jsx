@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import Leaflet from "leaflet";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -17,6 +17,9 @@ export default function MapPage() {
   const [isLogin, setIsLogin] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [pathLocation, setPathLocation] = useState([]);
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const navigate = useNavigate();
+
 
   const accessToken = localStorage.getItem("accessToken");
 
@@ -37,6 +40,8 @@ export default function MapPage() {
         }
         const data = await res.json();
         setUsers(data.findVehicleId);
+        console.log(data.findVehicleId);
+
       } catch (err) {
         setError(err);
       }
@@ -50,7 +55,6 @@ export default function MapPage() {
 
 
     socket.on("locationUpdate", (locationUpdate) => {
-      console.log(locationUpdate.licenserPlate);
 
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
@@ -67,8 +71,7 @@ export default function MapPage() {
     })
 
     socket.on("overspeed", (data) => {
-      console.log(data);
-      alert(`${data.licenserPlate} overpeed: ${data.speed}`)
+
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.licenserPlate === data.licenserPlate ?
@@ -93,13 +96,14 @@ export default function MapPage() {
 
 
 
+
+
   const handleSubmitPolylineById = async (vehicleId) => {
     setPathLocation([]); // clear polyline first
 
     try {
       const res = await fetch(`http://localhost:3000/trip/${vehicleId}`);
       const data = await res.json();
-      console.log(data.path);
 
       if (data.status === "onTrip") {
         setPathLocation(data.path || []);
@@ -114,9 +118,36 @@ export default function MapPage() {
     }
   };
 
+  const handleClearOverspeed = async (vehicleId) => {
+    try {
+      const res = await fetch(`http://localhost:3000/trip/${vehicleId}/clear-overspeed`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        }
+      });
+      if (!res.ok) {
+        throw new Error('Failed to clear overspeed status')
+      }
+      setUsers(prevUsers =>
+        prevUsers.map(u =>
+          u._id === vehicleId ? { ...u, isOverspeed: false } : u
+        )
+      )
+    } catch (err) {
+      setError(err)
+    }
+  }
 
-
-
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("role");
+    setShowLogoutPopup(false);
+    setIsLogin(false);
+    navigate("/")
+  };
 
 
 
@@ -130,25 +161,54 @@ export default function MapPage() {
 
   return (
     <>
-      <nav className="flex items-center justify-between bg-gray-200 p-3 h-20">
+      <nav className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-800 p-4 h-16 shadow-lg">
         <div>
-          <a href="/" className="text-xl outline-0">
+          <Link to="/" className="text-2xl font-bold text-white hover:text-blue-200 transition-colors">
             GPS TRACKING WEB
-          </a>
+          </Link>
         </div>
-        <div className="gap-5 flex">
-          <Link to="/vehicle/create">Dashboard</Link>
+        <div className="flex gap-6 text-white">
+          <Link to="/vehicle/create" className="hover:text-blue-200 transition-colors">
+            Dashboard
+          </Link>
           {isLogin && users ? (
-            <div>{localStorage.getItem("role")}</div> //temporary user
+            <div
+              className="font-semibold cursor-pointer select-none"
+              onClick={() => setShowLogoutPopup(true)}
+            >
+              {localStorage.getItem("username") || "user"}
+            </div>
           ) : (
-            <Link to="/login">Login</Link>
+            <Link to="/login">
+              Login
+            </Link>
           )}
         </div>
       </nav>
+      {showLogoutPopup && (
+        <div className="relative">
+          <div className="bg-white rounded-lg p-6 w-80 shadow-xl text-center absolute top-0 right-0">
+            <p className="mb-4 text-lg font-semibold">Are you sure you want to logout?</p>
+            <div className="flex justify-around">
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+              <button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition"
+                onClick={() => setShowLogoutPopup(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <section className="flex flex-row">
-        <main className="h-screen w-full flex flex-3 justify-center flex-col items-center">
-
+      <section className="flex flex-row h-[calc(100vh-4rem)]">
+        <main className="flex-3 w-full">
           <MapContainer
             center={position}
             zoom={8}
@@ -157,84 +217,90 @@ export default function MapPage() {
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution="&copy; OpenStreetMap contributors"
+              attribution="© OpenStreetMap contributors"
             />
-            {users.map(user => {
-              return (
-                <Marker key={user._id}
-                  position={[user.latitude, user.longitude]} icon={carIcon}>
-                  <Popup>
-                    {user.driverName} <br />
-                    Plate: {user.licenserPlate} <br />
-                    Lat: {user.latitude}, Lng: {user.longitude} <br />
-                    Status: {user.onTrip ? "On Trip" : "Idle"} <br />
-                    Speed: {user.speed}
-                  </Popup>
-                </Marker>
-              )
-            })}
+            {users.map((user) => (
+              <Marker
+                key={user._id}
+                position={[user.latitude, user.longitude]}
+                icon={carIcon}
+              >
+                <Popup>
+                  <div className="font-semibold">{user.driverName}</div>
+                  <div>Plate: {user.licenserPlate}</div>
+                  <div>Lat: {user.latitude}, Lng: {user.longitude}</div>
+                  <div>Status: {user.onTrip ? "On Trip" : "Idle"}</div>
+                  <div>Speed: {user.speed} km/h</div>
+                </Popup>
+              </Marker>
+            ))}
             {pathLocation.length > 0 && (
-              <Polyline positions={pathLocation.map(p => [p.latitude, p.longitude])} color="blue" />
+              <Polyline
+                positions={pathLocation.map((p) => [p.latitude, p.longitude])}
+                color="blue"
+              />
             )}
           </MapContainer>
         </main>
-        <aside className="h-screen bg-white flex-1">
-          {/* <div>
-            <h1>Licenser</h1>
-            <select value={selectedVehicleId}
-              onChange={(e) => setSelectedVehicleId(e.target.value)}>
-              <option value="">Select Licenser</option>
-              {users.map(user => {
-                return (
-                  <option key={user._id} value={user._id}>
-                    {user.licenserPlate}
-                  </option>
-                )
-              })}
-            </select>
-            <button
-              className="cursor-pointer"
-              type="button"
-              onClick={handleSubmitPolylineById}>Send</button>
-          </div> */}
-
-
-          <div>
-            <h1 className="text-center text-3xl my-5">Vehicle on road</h1>
-            <ul className="p-2">
-              {users.map(user => {
-                return (
-                  <li className={`hover:bg-gray-300 rounded-xl py-5 px-8 flex justify-between border-b-1 border-gray-400
-                    ${selectedVehicleId === user._id ? "bg-blue-100" : " "}`}
-                    key={user._id}
-                    onClick={() => {
-                      setSelectedVehicleId(user._id);
-                      handleSubmitPolylineById(user._id);
-                    }}
-                  >
-                    <div className="flex">
-                      <img className="h-7 w-7 mr-5" src={user.onTrip ? "../src/assets/greenSign.png" : "../src/assets/redSign.png"} />
-                      <h1>{user.driverName} : {user.licenserPlate}</h1>
+        <aside className="flex-1 bg-gray-50 shadow-inner h-full overflow-y-auto">
+          <div className="p-6">
+            <h1 className="text-3xl font-bold text-center text-blue-800 mb-6">
+              Vehicles on Road
+            </h1>
+            <ul className="space-y-3">
+              {users.map((user) => (
+                <li
+                  key={user._id}
+                  onClick={() => {
+                    setSelectedVehicleId(user._id);
+                    handleSubmitPolylineById(user._id);
+                  }}
+                  className={`flex justify-between items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ${selectedVehicleId === user._id
+                    ? "bg-blue-100 border-l-4 border-blue-600"
+                    : "bg-white hover:bg-gray-100"
+                    } shadow-sm`}
+                >
+                  <div className="flex items-center">
+                    <img
+                      className="h-6 w-6 mr-4"
+                      src={
+                        user.onTrip
+                          ? "../src/assets/greenSign.png"
+                          : "../src/assets/redSign.png"
+                      }
+                      alt={user.onTrip ? "On Trip" : "Idle"}
+                    />
+                    <div>
+                      <h2 className="font-semibold text-gray-800">
+                        {user.driverName}
+                      </h2>
+                      <p className="text-sm text-gray-600">
+                        {user.licenserPlate}
+                      </p>
                     </div>
-                    <img className="h-7 w-7 cursor-pointer"
-                      src={user.isOverspeed ? "../src/assets/notification-red.png" : "../src/assets/notification.png"}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setUsers(prevUsers =>
-                          prevUsers.map(u =>
-                            u._id === user._id ? { ...u, isOverspeed: false } : u
-                          )
-                        )
-                      }} />
-                  </li>
-                )
-              })}
+                  </div>
+                  <img
+                    className="h-6 w-6 cursor-pointer"
+                    src={
+                      user.isOverspeed
+                        ? "../src/assets/notification-red.png"
+                        : "../src/assets/notification.png"
+                    }
+                    alt={user.isOverspeed ? "Overspeed" : "Normal"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (user.isOverspeed) {
+                        handleClearOverspeed(user._id);
+                        alert("Overspeed cleared");
+                      }
+                    }}
+                  />
+                </li>
+              ))}
             </ul>
-
           </div>
         </aside>
       </section>
-
     </>
   );
 }

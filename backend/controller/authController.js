@@ -53,7 +53,8 @@ exports.login = async (req, res) => {
             message: "Login Ssuccessfully",
             role: loginUser.role,
             accessToken,
-            refreshToken
+            refreshToken,
+            username: loginUser.username
         })
     } catch (err) {
         console.error(err);

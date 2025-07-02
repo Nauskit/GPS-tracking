@@ -30,6 +30,8 @@ export default function LoginPage() {
         throw new Error(data.message || "Login Failed");
       }
       localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken)
+      localStorage.setItem("username", data.username)
       localStorage.setItem("role", data.role);
 
       alert("Login successful");

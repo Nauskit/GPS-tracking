@@ -8,6 +8,9 @@ export default function VehiclePage() {
   const [driverName, setDriverName] = useState("");
   const [licenser, setLicenser] = useState("");
   const [carType, setCarType] = useState("");
+  const [popupLog, setPopupLog] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [locationLogs, setLocationLogs] = useState([]);
 
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export default function VehiclePage() {
     fetchVehicle();
   }, []);
 
-  const handleSumbit = async (e) => {
+  const handleSubmit = async (e) => {
     const accessToken = localStorage.getItem("accessToken");
     e.preventDefault();
     try {
@@ -61,50 +64,83 @@ export default function VehiclePage() {
     }
   };
 
+  const handleSubmitLog = async (driverId) => {
+    try {
+      const res = await fetch(`http://localhost:3000/locationlog/${driverId}`)
+      const data = await res.json();
+      setLocationLogs(data);
+    } catch (err) {
+      setError(err)
+    }
+  }
+
   return (
     <>
-      <main className="flex-1 p-6">
-        <header className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">
+      <main className="min-h-screen bg-gray-50 p-8">
+        <header className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-blue-800">
             {users[0]?.userId?.username || "Let's Login"}
           </h1>
-          <div className="flex gap-3">
-
-
+          <div className="flex gap-4">
             <button
               onClick={() => setPopup(true)}
-              className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md"
             >
-              + Create
+              + Create Vehicle
             </button>
-            <Link to='/map' className="bg-gray-500 px-4 py-2 rounded hover:bg-gray-600">Back</Link>
+            <Link to="/map" className="bg-gray-600 text-white px-5 py-2.5 rounded-lg hover:bg-gray-700 transition-all duration-200 shadow-md">
+              Back to Map
+            </Link>
           </div>
         </header>
-        {error && <div>{error}</div>}
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 text-red-800 rounded-lg shadow">
+            {error}
+          </div>
+        )}
 
         {!error && (
-          <div className="bg-white rounded-lg shadow mt-10">
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full table-auto border-collapse">
                 <thead>
-                  <tr className="bg-stone-400">
-                    <th className="p-3 text-left">Type</th>
-                    <th className="p-3 text-left">Licensor Plate</th>
-                    <th className="p-3 text-left">Driver name</th>
-                    <th className="p-3 text-left">On Trip</th>
+                  <tr className="bg-blue-600 text-white">
+                    <th className="p-4 text-left font-semibold">Type</th>
+                    <th className="p-4 text-left font-semibold">License Plate</th>
+                    <th className="p-4 text-left font-semibold">Driver Name</th>
+                    <th className="p-4 text-left font-semibold">Status</th>
+                    <th className="p-4 text-left font-semibold">Location Log</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => {
-                    return (
-                      <tr key={user._id} className="border-b-2">
-                        <td className="p-3">{user.carType}</td>
-                        <td className="p-3">{user.licenserPlate}</td>
-                        <td className="p-3">{user.driverName}</td>
-                        <td className="p-3">{user.onTrip ? "On trip" : "Idle"}</td>
-                      </tr>
-                    );
-                  })}
+                  {users.map((user) => (
+                    <tr key={user._id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                      <td className="p-4">{user.carType}</td>
+                      <td className="p-4">{user.licenserPlate}</td>
+                      <td className="p-4">{user.driverName}</td>
+                      <td className="p-4">
+                        <span
+                          className={`px-2 py-1 rounded-full text-sm ${user.onTrip ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                            }`}
+                        >
+                          {user.onTrip ? "On Trip" : "Idle"}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <button
+                          onClick={async () => {
+                            setSelectedVehicle(user);
+                            setPopupLog(true);
+                            await handleSubmitLog(user._id);
+                          }}
+                          className="text-blue-600 hover:text-blue-800 font-semibold"
+                        >
+                          View Log
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -112,64 +148,108 @@ export default function VehiclePage() {
         )}
 
         {popup && (
-          <div
-            className="fixed bg-black/50 min-h-screen z-10 w-screen flex
-        justify-center items-center top-0 left-0"
-          >
-            <div className="bg-white p-4">
-              <div className="flex flex-col gap-4 max-w-[400px]">
-                <div className="flex justify-between">
-                  <h2>Register Vehicle</h2>
-                  <a
-                    className="cursor-pointer"
-                    onClick={() => setPopup(false)}
-                  >
-                    X
-                  </a>
-                </div>
-
-                <form onSubmit={handleSumbit} className="space-y-4">
-                  <div>
-                    <label>Driver Name</label>
-                    <input
-                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
-                      type="text"
-                      placeholder="Somchai"
-                      onChange={(e) => setDriverName(e.target.value)}
-                    ></input>
-                  </div>
-                  <div>
-                    <label>Licensor Plate</label>
-                    <input
-                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
-                      type="text"
-                      placeholder="ทส1122"
-                      onChange={(e) => setLicenser(e.target.value)}
-                    ></input>
-                  </div>
-                  <div>
-                    <label>Car type</label>
-                    <input
-                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
-                      type="text"
-                      placeholder="truck"
-                      onChange={(e) => setCarType(e.target.value)}
-                    ></input>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded-md
-                    hover:bg-blue-700 transition duration-200"
-                  >
-                    Create
-                  </button>
-                </form>
+          <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full animate-fade-in">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-blue-800">Register Vehicle</h2>
+                <button
+                  onClick={() => setPopup(false)}
+                  className="text-gray-600 hover:text-gray-800 font-bold text-lg"
+                >
+                  ✕
+                </button>
               </div>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Driver Name</label>
+                  <input
+                    className="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    type="text"
+                    placeholder="Somchai"
+                    value={driverName}
+                    onChange={(e) => setDriverName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">License Plate</label>
+                  <input
+                    className="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    type="text"
+                    placeholder="ทส1122"
+                    value={licenser}
+                    onChange={(e) => setLicenser(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Car Type</label>
+                  <input
+                    className="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    type="text"
+                    placeholder="Truck"
+                    value={carType}
+                    onChange={(e) => setCarType(e.target.value)}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md"
+                >
+                  Create Vehicle
+                </button>
+              </form>
             </div>
-          </div >
-        )
-        }
-      </main >
+          </div>
+        )}
+
+        {popupLog && (
+          <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+            <div className="bg-white
+            p-8 rounded-xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto animate-fade-in">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-blue-800">Location Log for {selectedVehicle?.driverName}</h2>
+                <button
+                  onClick={() => setPopupLog(false)}
+                  className="text-gray-600 hover:text-gray-800 font-bold text-lg"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="mb-6">
+                <p className="font-semibold text-gray-800">Driver Name: {selectedVehicle?.driverName}</p>
+                <p className="text-gray-600">License Plate: {selectedVehicle?.licenserPlate}</p>
+              </div>
+
+              <table className="w-full table-auto border-collapse">
+                <thead>
+                  <tr className="bg-blue-50 text-blue-800">
+                    <th className="p-4 text-left font-semibold">Trip ID</th>
+                    <th className="p-4 text-left font-semibold">Latitude</th>
+                    <th className="p-4 text-left font-semibold">Longitude</th>
+                    <th className="p-4 text-left font-semibold">Created At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {locationLogs.length > 0 ? (
+                    locationLogs.map((location, index) => (
+                      <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
+                        <td className="p-4">{location.tripId || '-'}</td>
+                        <td className="p-4">{location.latitude}</td>
+                        <td className="p-4">{location.longitude}</td>
+                        <td className="p-4">{new Date(location.createdAt).toLocaleString()}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="p-4 text-center text-gray-600">No location logs available</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </main>
     </>
   );
 }

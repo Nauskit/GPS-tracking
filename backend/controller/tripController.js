@@ -82,6 +82,7 @@ exports.logLocation = async (req, res) => {
             };
 
             await publisher.publish("vehicle:overspeed", JSON.stringify(alertData));
+            await Vehicles.findByIdAndUpdate(vehicleId, { isOverspeed: true });
         }
         return res.status(201).json(locationLog)
     } catch (err) {
@@ -89,6 +90,16 @@ exports.logLocation = async (req, res) => {
     }
 }
 
+exports.clearOverspeed = async (req, res) => {
+    const { vehicleId } = req.params;
+
+    try {
+        await Vehicles.findByIdAndUpdate(vehicleId, { isOverspeed: false });
+        return res.status(200).json({ message: "Overspeed cleared" });
+    } catch (err) {
+        return res.status(500).json({ message: "Failed to clear overspeed", error: err.message });
+    }
+}
 
 //getVehicle path
 exports.getLocationLog = async (req, res) => {

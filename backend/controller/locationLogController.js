@@ -18,17 +18,17 @@ exports.systemLocationLog = async (req, res) => {
   }
 };
 
-// exports.getSystemLocationLog = async (req, res) => {
-//   const vehicleId = req.params.id;
+exports.getSystemLocationLog = async (req, res) => {
+  const vehicleId = req.params.id;
 
-//   if (!vehicleId) {
-//     return res.status(401).json({ message: "Not have vegicleId" });
-//   }
-//   try {
-//     const logs = await LocationLog.findById(vehicleId);
+  if (!vehicleId) {
+    return res.status(401).json({ message: "Not have vegicleId" });
+  }
+  try {
+    const logs = await LocationLog.find({ vehicleId }).sort({ createAt: -1 });
 
-//     return res.status(200).json(logs);
-//   } catch (err) {
-//     return res.status(500).json({ message: "Server error" });
-//   }
-// };
+    return res.status(200).json(logs);
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};

@@ -34,6 +34,10 @@ const vehiclesSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isOverspeed: {
+    type: Boolean,
+    default: false
+  },
   createAt: {
     type: Date,
     default: Date.now,

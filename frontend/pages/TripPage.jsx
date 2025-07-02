@@ -23,6 +23,7 @@ export default function TripPage() {
                 })
                 const data = await res.json();
                 setUserVehicles(data);
+
             } catch (err) {
                 console.log(err);
             }

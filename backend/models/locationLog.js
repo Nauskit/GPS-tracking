@@ -25,5 +25,5 @@ const locationLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-locationLogSchema.index({ createAt: 1 }, { expireAfterSeconds: 2592000 })
+locationLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 2592000 })
 module.exports = mongoose.model("LocationLog", locationLogSchema);
