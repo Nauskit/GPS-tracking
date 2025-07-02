@@ -78,7 +78,8 @@ exports.updateVehicleLocation = async (req, res) => {
       licenserPlate,
       latitude,
       longitude,
-      speed: vehicle.speed
+      speed: vehicle.speed,
+      onTrip: vehicle.onTrip
     })
 
 

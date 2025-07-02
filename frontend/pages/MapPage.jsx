@@ -55,7 +55,12 @@ export default function MapPage() {
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.licenserPlate === locationUpdate.licenserPlate ?
-            { ...user, latitude: locationUpdate.latitude, longitude: locationUpdate.longitude, speed: locationUpdate.speed }
+            {
+              ...user, latitude: locationUpdate.latitude,
+              longitude: locationUpdate.longitude,
+              speed: locationUpdate.speed,
+              onTrip: locationUpdate.onTrip
+            }
             : user
         )
       )
@@ -64,6 +69,13 @@ export default function MapPage() {
     socket.on("overspeed", (data) => {
       console.log(data);
       alert(`${data.licenserPlate} overpeed: ${data.speed}`)
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.licenserPlate === data.licenserPlate ?
+            { ...user, isOverspeed: true }
+            : user
+        )
+      )
     })
 
     socket.on("connect", () => {
@@ -81,19 +93,30 @@ export default function MapPage() {
 
 
 
-  const handleSubmitPolyline = async (e) => {
-    e.preventDefault();
-    setPathLocation([]); //clear polyline when fetch
-    try {
-      const res = await fetch(`http://localhost:3000/trip/${selectedVehicleId}`)
-      const data = await res.json();
-      setPathLocation(data.path || []);
-    } catch (err) {
-      alert("Not found Path or null ")
-      console.log(err);
+  const handleSubmitPolylineById = async (vehicleId) => {
+    setPathLocation([]); // clear polyline first
 
+    try {
+      const res = await fetch(`http://localhost:3000/trip/${vehicleId}`);
+      const data = await res.json();
+      console.log(data.path);
+
+      if (data.status === "onTrip") {
+        setPathLocation(data.path || []);
+      } else {
+        setPathLocation([]); // clear polyline
+        console.log("Finish Trip");
+      }
+
+    } catch (err) {
+      alert("Not found Path or null");
+      console.error(err);
     }
-  }
+  };
+
+
+
+
 
 
 
@@ -124,7 +147,7 @@ export default function MapPage() {
       </nav>
 
       <section className="flex flex-row">
-        <main className="h-screen w-full flex flex-2 justify-center flex-col items-center">
+        <main className="h-screen w-full flex flex-3 justify-center flex-col items-center">
 
           <MapContainer
             center={position}
@@ -156,7 +179,7 @@ export default function MapPage() {
           </MapContainer>
         </main>
         <aside className="h-screen bg-white flex-1">
-          <div>
+          {/* <div>
             <h1>Licenser</h1>
             <select value={selectedVehicleId}
               onChange={(e) => setSelectedVehicleId(e.target.value)}>
@@ -172,10 +195,43 @@ export default function MapPage() {
             <button
               className="cursor-pointer"
               type="button"
-              onClick={handleSubmitPolyline}>Send</button>
+              onClick={handleSubmitPolylineById}>Send</button>
+          </div> */}
+
+
+          <div>
+            <h1 className="text-center text-3xl my-5">Vehicle on road</h1>
+            <ul className="p-2">
+              {users.map(user => {
+                return (
+                  <li className={`hover:bg-gray-300 rounded-xl py-5 px-8 flex justify-between border-b-1 border-gray-400
+                    ${selectedVehicleId === user._id ? "bg-blue-100" : " "}`}
+                    key={user._id}
+                    onClick={() => {
+                      setSelectedVehicleId(user._id);
+                      handleSubmitPolylineById(user._id);
+                    }}
+                  >
+                    <div className="flex">
+                      <img className="h-7 w-7 mr-5" src={user.onTrip ? "../src/assets/greenSign.png" : "../src/assets/redSign.png"} />
+                      <h1>{user.driverName} : {user.licenserPlate}</h1>
+                    </div>
+                    <img className="h-7 w-7 cursor-pointer"
+                      src={user.isOverspeed ? "../src/assets/notification-red.png" : "../src/assets/notification.png"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setUsers(prevUsers =>
+                          prevUsers.map(u =>
+                            u._id === user._id ? { ...u, isOverspeed: false } : u
+                          )
+                        )
+                      }} />
+                  </li>
+                )
+              })}
+            </ul>
+
           </div>
-
-
         </aside>
       </section>
 
