@@ -1,4 +1,10 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+} from "react-leaflet";
 import Leaflet from "leaflet";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -20,7 +26,6 @@ export default function MapPage() {
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const navigate = useNavigate();
 
-
   const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
@@ -33,7 +38,7 @@ export default function MapPage() {
           },
         });
         if (!res.ok) {
-          throw new Error(error.message || "Ftch Failed");
+          throw new Error(error.message || "Fetch Failed");
         }
         if (accessToken) {
           setIsLogin(true);
@@ -41,62 +46,48 @@ export default function MapPage() {
         const data = await res.json();
         setUsers(data.findVehicleId);
         console.log(data.findVehicleId);
-
       } catch (err) {
         setError(err);
       }
-
     };
     fetchVehicle();
 
-
-
     const socket = io("http://localhost:3000");
 
-
     socket.on("locationUpdate", (locationUpdate) => {
-
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
-          user.licenserPlate === locationUpdate.licenserPlate ?
-            {
-              ...user, latitude: locationUpdate.latitude,
-              longitude: locationUpdate.longitude,
-              speed: locationUpdate.speed,
-              onTrip: locationUpdate.onTrip
-            }
+          user.licenserPlate === locationUpdate.licenserPlate
+            ? {
+                ...user,
+                latitude: locationUpdate.latitude,
+                longitude: locationUpdate.longitude,
+                speed: locationUpdate.speed,
+                onTrip: locationUpdate.onTrip,
+              }
             : user
         )
-      )
-    })
+      );
+    });
 
     socket.on("overspeed", (data) => {
-
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
-          user.licenserPlate === data.licenserPlate ?
-            { ...user, isOverspeed: true }
+          user.licenserPlate === data.licenserPlate
+            ? { ...user, isOverspeed: true }
             : user
         )
-      )
-    })
+      );
+    });
 
     socket.on("connect", () => {
       console.log("User connect");
-
     });
     return () => {
       socket.disconnect();
       console.log("User disconnect");
     };
-
-
   }, []);
-
-
-
-
-
 
   const handleSubmitPolylineById = async (vehicleId) => {
     setPathLocation([]); // clear polyline first
@@ -111,7 +102,6 @@ export default function MapPage() {
         setPathLocation([]); // clear polyline
         console.log("Finish Trip");
       }
-
     } catch (err) {
       alert("Not found Path or null");
       console.error(err);
@@ -120,25 +110,28 @@ export default function MapPage() {
 
   const handleClearOverspeed = async (vehicleId) => {
     try {
-      const res = await fetch(`http://localhost:3000/trip/${vehicleId}/clear-overspeed`, {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+      const res = await fetch(
+        `http://localhost:3000/trip/${vehicleId}/clear-overspeed`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
-      });
+      );
       if (!res.ok) {
-        throw new Error('Failed to clear overspeed status')
+        throw new Error("Failed to clear overspeed status");
       }
-      setUsers(prevUsers =>
-        prevUsers.map(u =>
+      setUsers((prevUsers) =>
+        prevUsers.map((u) =>
           u._id === vehicleId ? { ...u, isOverspeed: false } : u
         )
-      )
+      );
     } catch (err) {
-      setError(err)
+      setError(err);
     }
-  }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -146,29 +139,27 @@ export default function MapPage() {
     localStorage.removeItem("role");
     setShowLogoutPopup(false);
     setIsLogin(false);
-    navigate("/")
+    navigate("/");
   };
 
-
-
-
-
-
-
-
   const position = [13.7563, 100.5018];
-
 
   return (
     <>
       <nav className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-800 p-4 h-16 shadow-lg">
         <div>
-          <Link to="/" className="text-2xl font-bold text-white hover:text-blue-200 transition-colors">
+          <Link
+            to="/"
+            className="text-2xl font-bold text-white hover:text-blue-200 transition-colors"
+          >
             GPS TRACKING WEB
           </Link>
         </div>
         <div className="flex gap-6 text-white">
-          <Link to="/vehicle/create" className="hover:text-blue-200 transition-colors">
+          <Link
+            to="/vehicle/create"
+            className="hover:text-blue-200 transition-colors"
+          >
             Dashboard
           </Link>
           {isLogin && users ? (
@@ -179,16 +170,16 @@ export default function MapPage() {
               {localStorage.getItem("username") || "user"}
             </div>
           ) : (
-            <Link to="/login">
-              Login
-            </Link>
+            <Link to="/login">Login</Link>
           )}
         </div>
       </nav>
       {showLogoutPopup && (
         <div className="relative">
           <div className="bg-white rounded-lg p-6 w-80 shadow-xl text-center absolute top-0 right-0">
-            <p className="mb-4 text-lg font-semibold">Are you sure you want to logout?</p>
+            <p className="mb-4 text-lg font-semibold">
+              Are you sure you want to logout?
+            </p>
             <div className="flex justify-around">
               <button
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
@@ -228,7 +219,9 @@ export default function MapPage() {
                 <Popup>
                   <div className="font-semibold">{user.driverName}</div>
                   <div>Plate: {user.licenserPlate}</div>
-                  <div>Lat: {user.latitude}, Lng: {user.longitude}</div>
+                  <div>
+                    Lat: {user.latitude}, Lng: {user.longitude}
+                  </div>
                   <div>Status: {user.onTrip ? "On Trip" : "Idle"}</div>
                   <div>Speed: {user.speed} km/h</div>
                 </Popup>
@@ -255,10 +248,11 @@ export default function MapPage() {
                     setSelectedVehicleId(user._id);
                     handleSubmitPolylineById(user._id);
                   }}
-                  className={`flex justify-between items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ${selectedVehicleId === user._id
-                    ? "bg-blue-100 border-l-4 border-blue-600"
-                    : "bg-white hover:bg-gray-100"
-                    } shadow-sm`}
+                  className={`flex justify-between items-center p-4 rounded-lg cursor-pointer transition-all duration-200 ${
+                    selectedVehicleId === user._id
+                      ? "bg-blue-100 border-l-4 border-blue-600"
+                      : "bg-white hover:bg-gray-100"
+                  } shadow-sm`}
                 >
                   <div className="flex items-center">
                     <img
